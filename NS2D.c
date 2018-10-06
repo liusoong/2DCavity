@@ -163,7 +163,11 @@ void MG_Poisson(double **p,double **f)
 
 void source_uv(double **tu,double **tv,double **divuv,int nxt,int nyt){
     int i,j;
-    div_uv(tu,tv,divuv,nxt,nyt); ijloopt {divuv[i][j] /= dt;}
+    div_uv(tu,tv,divuv,nxt,nyt); 
+    ijloopt {
+	    divuv[i][j] /= dt;
+	    printf("%d\t%d\t%f\n", i, j, divuv[i][j]);
+	    }
 }
 
 void augmenuv(double **u,double **v,int nx,int ny){   
@@ -180,10 +184,13 @@ void Poisson(double **tu,double **tv,double **p){
 void temp_uv(double **tu,double **tv,double **u,double **v,
         double **adv_u,double **adv_v){
             int i,j;
-    for (i=1; i<nx; i++) {jloop {tu[i][j] = u[i][j]+dt*( (u[i+1][j]
-    +u[i-1][j]-4.0*u[i][j]+u[i][j+1]+u[i][j-1])/(Re*h2)-adv_u[i][j]);}}
-    iloop {for (j=1; j<ny; j++) {tv[i][j] = v[i][j]+dt*( (v[i+1][j]
-    +v[i-1][j]-4.0*v[i][j]+v[i][j+1]+v[i][j-1])/(Re*h2)-adv_v[i][j]);}}
+    for (i=1; i<nx; i++) {jloop {
+	    tu[i][j] = u[i][j]+dt*( (u[i+1][j]+u[i-1][j]-4.0*u[i][j]+u[i][j+1]+u[i][j-1])/(Re*h2)-adv_u[i][j]);
+ 	    }}
+    iloop {for (j=1; j<ny; j++) {
+	    tv[i][j] = v[i][j]+dt*( (v[i+1][j]+v[i-1][j]-4.0*v[i][j]+v[i][j+1]+v[i][j-1])/(Re*h2)-adv_v[i][j]);
+	    // printf("%d\t%d\t%f\n", i, j, tv[i][j]);
+	    }}
 }
 
 void advection_uv(double **u,double **v,double **adv_u,double **adv_v){
@@ -252,10 +259,16 @@ int main(){
     fp = fopen(bufferp,"w");fclose(fu);fclose(fv);fclose(fp);
     initialization(p,u,v);  print_data1(u,v,p);
     mat_copy(nu,u,0,nx,1,ny); mat_copy(nv,v,1,nx,0,ny);
-    for (it=1; it<=max_it; it++) {printf("iteration = %d\n",it);
+    for (it=1; it<=max_it; it++) 
+    {
+	printf("iteration = %d\n",it);
         full_step(u,v,nu,nv,p); mat_copy(u,nu,0,nx,1,ny);
         mat_copy(v,nv,1,nx,0,ny);
-        if (it % ns==0) {print_data1(nu,nv,p);
-      printf("print out counts %d \n",count);count++;}}
+        /*if (it % ns==0) */
+	{
+		print_data1(nu,nv,p);
+		/*printf("print out counts %d \n",count);count++;*/
+	}
+    }
     return 0;
 }

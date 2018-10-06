@@ -276,7 +276,7 @@ module moduleMultiGrid
 			nTemp = n / (2 ** i)		
 			n1D = n1D + (nTemp) ** 2	
 			i = i + 1		
-			print *,  "nTemp = ", nTemp, "n1D = ", n1D		
+			print "(a10, i8, 10x, a10, i8)",  "nTemp = ", nTemp, "n1D = ", n1D		
 		END Do
 		
 		Allocate(lhs1D(1 : n1D))
@@ -362,7 +362,7 @@ module moduleMultiGrid
 				nIt = nIt + 1
 				pOld = p
 				call vCycle(p, rhs)
-				call nomaliseP(p)
+				call normaliseP(p)
 				resid = maxval(abs(pOld - p))
 		end do
 		
