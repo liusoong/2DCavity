@@ -132,8 +132,9 @@ void pressure_update(double **a){
 }
 
 void vcycle_uv(double **uf,double **ff,int nxf,int nyf,int ilevel){
-    relax_p(uf,ff,nxf,nyf);
-    if (ilevel < n_level) {
+	printf("nLevel = %d, iLevel = %d, n = %d\n", n_level, ilevel, nxf);	/////////////////////////////
+	relax_p(uf,ff,nxf,nyf);
+	if (ilevel < n_level) {
         int nxc,nyc;
         double **rf,**uc,**fc;
         nxc=nxf / 2; nyc=nyf / 2; rf=dmatrix(1,nxf,1,nyf);
@@ -151,6 +152,7 @@ void MG_Poisson(double **p,double **f)
 	int i,j,max_it = 2000,it_mg = 1;
 	double tol = 1.0e-5,resid = 1.0;
 	mat_copy(workv,p,1,nx,1,ny);
+	//printf("CenterPressure is %f \n",p[nx/2][ny/2]);	/////////////////////////////
 	while (it_mg <= max_it && resid >= tol) 
 	{
 		it_mg++;

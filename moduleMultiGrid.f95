@@ -291,8 +291,11 @@ module moduleMultiGrid
 		do i = 1, n
 			Do j = 1, n
 				thisIndex1D = getIndex1D (i, j, 0)
+				!print *, "1D index: ", thisIndex1D	!!!!!!!!!!!!!!!!!!!!!!!!	
 				lhs1D(thisIndex1D) = p(i, j)
+				!print *, "lhs: ", lhs1D(thisIndex1D)	!!!!!!!!!!!!!!!!!!!!!!!!
 				rhs1D(thisIndex1D) = rhs(i, j)
+				!print *, "rhs: ", rhs1D(thisIndex1D)	!!!!!!!!!!!!!!!!!!!!!!!!
 			end do
 		end do
 		
@@ -351,16 +354,16 @@ module moduleMultiGrid
 		integer,	parameter	:: maxMGIt = 2000
 		integer,	parameter	:: nRelax = 5
 		real(8), 	parameter	:: tol = 1.0e-5
-		!~ integer,	intent(in)	:: n
 		real(8),	intent(in)	:: rhs(1 : n, 1 : n)
 		real(8)				:: p(1 : n, 1 : n)
 		integer				:: i, j, nIt = 1 
 		real(8)				:: resid = 1.0
-		real(8)				:: pOld(n, n)
+		real(8)				:: pOld(1 : n, 1 : n)
 		
 		do while (nIt <= maxMGIt .and. resid > tol)
 				nIt = nIt + 1
 				pOld = p
+				!print *, "Center pressure is: ", pOld(n / 2, n / 2)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				call vCycle(p, rhs)
 				call normaliseP(p)
 				resid = maxval(abs(pOld - p))

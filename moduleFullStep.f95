@@ -62,11 +62,11 @@ module moduleFullStep
 	
 	subroutine advectionUV(h, drivingV, u, v, advU, advV)
 	
-		real(8),	intent(in) 		:: h, drivingV
-		real(8) 							:: u(0 : n, 0 : n + 1), v(0 : n + 1, 0 : n)
+		real(8),	intent(in) 	:: h, drivingV
+		real(8) 				:: u(0 : n, 0 : n + 1), v(0 : n + 1, 0 : n)
 		real(8), 	intent(out) 	:: advU(0 : n, 0 : n + 1), advV(0 : n + 1, 0 : n)
-		integer 							:: i, j		
-		real(8)							:: uatv, vatu
+		integer 				:: i, j		
+		real(8)				:: uatv, vatu
 		
 		advU = 0.0
 		advV = 0.0
