@@ -140,7 +140,7 @@ module moduleFullStep
 			!~ end do					!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		!~ end do						!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		
-		call multiGridV(p, rhs)
+		call multiGridV(h, p, rhs)
 	
 	end subroutine poisson
 	

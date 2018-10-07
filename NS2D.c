@@ -105,8 +105,8 @@ void restrict(double **u_fine,double **u_coarse,int nxt,int nyt){
 	ijloopt 
 	{
 		u_coarse[i][j]=0.25*(u_fine[2*i-1][2*j-1]+u_fine[2*i-1][2*j]+u_fine[2*i][2*j-1]+u_fine[2*i][2*j]);
-		if(i == j)
-			printf("%d\t%d\t%f\n", i, j, u_coarse[i][j]);
+		//~ if(i == j)
+			//~ printf("%d\t%d\t%f\n", i, j, u_coarse[i][j]);
 	} 
 }
 
@@ -129,6 +129,10 @@ void relax_p(double **p,double **f,int nxt,int nyt){
     int i,j,iter;
     double ht,ht2,coef,src;
     ht2 = pow((xright-xleft) / (double) nxt,2);
+    //~ if(nxt ==16)
+	    //~ ijloopt 
+		//~ if(i ==  j)
+			//~ printf("%d\t%d\t%f\t%f\n", i, j, p[i][j], f[i][j]);
     for (iter=1; iter<=p_relax; iter++) 
 	{
 		ijloopt 
@@ -141,10 +145,11 @@ void relax_p(double **p,double **f,int nxt,int nyt){
 			else if (j==nyt) {src -= p[i][nyt-1]/ht2; coef += -1.0/ht2;}
 			else {src -= (p[i][j+1] + p[i][j-1])/ht2; coef += -2.0/ht2;}
 			p[i][j] = src / coef;
-			//~ if (i == nxt && j == nyt)
-			//~ {
-				//~ printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\n", i, j, h, src, coef, p[i][j], f[i][j]);
-			//~ }
+			if (i == nxt && j == nyt)
+			{
+				printf("%d\t%d\t%f\t%f\n", i, j, p[i][j], f[i][j]);
+				//~ printf("%f\t%f\n", p[i-1][j], p[i][j-1]);
+			}
 		}
 	}
 }
@@ -166,8 +171,8 @@ void vcycle_uv(double **uf,double **ff,int nxf,int nyf,int ilevel){
         uc=dmatrix(1,nxc,1,nyc); fc=dmatrix(1,nxc,1,nyc);
         residual_p(rf,uf,ff,nxf,nyf); restrict(rf,fc,nxc,nyc);
         zero_matrix(uc,1,nxc,1,nyc);
-        //vcycle_uv(uc,fc,nxc,nyc,ilevel + 1);
-        prolong(uc,rf,nxc,nyc); mat_add(uf,uf,rf,1,nxf,1,nyf);
+        vcycle_uv(uc,fc,nxc,nyc,ilevel + 1);
+        //prolong(uc,rf,nxc,nyc); mat_add(uf,uf,rf,1,nxf,1,nyf);
         //relax_p(uf,ff,nxf,nyf); free_dmatrix(rf,1,nxf,1,nyf);
         free_dmatrix(uc,1,nxc,1,nyc); free_dmatrix(fc,1,nxc,1,nyc);}
 }
