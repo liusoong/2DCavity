@@ -32,11 +32,14 @@ module moduleMultiGrid
 	integer function getIndex1DUp(i, j, level) result (Index1DForUp)
 	
 		integer, intent(in)	:: i, j, level
+		integer				:: nTemp
 		
-		if(i == 1) then
+		nTemp = n / (2 ** level)
+		
+		if(j == nTemp) then
 			Index1DForUp = 0
 		else
-			Index1DForUp = getIndex1D(i - 1, j, level)
+			Index1DForUp = getIndex1D(i, j + 1, level)
 		end if
 	
 	end function getIndex1DUp
@@ -44,15 +47,12 @@ module moduleMultiGrid
 	! Get 1D array index for (i+1, j)
 	integer function getIndex1DDown(i, j, level) result (index1DForDown)
 	
-		integer, intent(in)	:: i, j, level
-		integer				:: nTemp
-	
-		nTemp = n / (2 ** level)
+		integer, intent(in)	:: i, j, level	
 		
-		if(i == nTemp) then
+		if(j == 1) then
 			index1DForDown = 0
 		else
-			index1DForDown = getIndex1D(i + 1, j, level)
+			index1DForDown = getIndex1D(i, j - 1, level)
 		end if
 	
 	end function getIndex1DDown
@@ -62,10 +62,10 @@ module moduleMultiGrid
 	
 		integer, intent(in)	:: i, j, level
 		
-		if(j == 1) then
+		if(i == 1) then
 			index1DForLeft = 0
 		else
-			index1DForLeft = getIndex1D(i, j - 1, level)
+			index1DForLeft = getIndex1D(i - 1, j, level)
 		end if
 	
 	end function getIndex1DLeft
@@ -76,12 +76,12 @@ module moduleMultiGrid
 		integer, intent(in)	:: i, j, level
 		integer				:: nTemp
 	
-		nTemp = n / (2 ** level)
+		nTemp = n / (2 ** level)		
 		
-		if(j == nTemp) then
+		if(i == nTemp) then
 			index1DForRight = 0
 		else
-			index1DForRight = getIndex1D(i, j + 1, level)
+			index1DForRight = getIndex1D(i + 1, j, level)
 		end if
 	
 	end function getIndex1DRight
@@ -99,6 +99,7 @@ module moduleMultiGrid
 		real(8)				:: up, down, left, right
 		
 		nTemp = n / (2 ** level)
+		print *, "nTemp = ", nTemp	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		
 		do iIter = 1 , nIter
 			do i = 1 , nTemp
@@ -132,6 +133,9 @@ module moduleMultiGrid
 					end if
 					! Calculate new (i,j) value
 					lhs1D(index1D) = ((up + down + left + right) - rhs1D(index1D) * h**2) / 4
+					if (i == j) then
+						print *, i, j, index1D, index1DUp, index1DDown, index1DLeft, index1DRight, lhs1D(index1D)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					end if
 				end do
 			end do		
 		end do
@@ -252,9 +256,9 @@ module moduleMultiGrid
 	end subroutine prolong	
 	
 	
-	subroutine vCycle(p, rhs)
+	subroutine vCycle(p, rhs, nRelax)
 	
-		!~ integer,	intent(in)				:: n
+		integer,	intent(in)				:: nRelax
 		real(8),	intent(in)				:: rhs(1 : n, 1 : n)
 		real(8)							:: p(1 : n, 1 : n), pRes(1 : n, 1 : n)
 		real(8)							:: nToReal
@@ -300,20 +304,21 @@ module moduleMultiGrid
 		end do
 		
 		! Restrict down
-		Do i = 0, nLevels - 1
-			call relaxGS(lhs1D, rhs1D, n1D, i, 5)
+		!Do i = 0, nLevels - 1
+			i = 0	!!!!!!!!!!!!!!!!!!!!!!!
+			call relaxGS(lhs1D, rhs1D, n1D, i, nRelax)
 			call residue(lhs1D, rhs1d, res1d, n1D, i)
-			call restrict(res1D, rhs1D, n1D, i)	
-		END Do
+			!call restrict(res1D, rhs1D, n1D, i)	
+		!END Do
 		
-		! Lowest layer
-		call relaxGS(lhs1D, rhs1D, n1D, nLevels, 5)
+		!~ ! Lowest layer
+		!~ call relaxGS(lhs1D, rhs1D, n1D, nLevels, nRelax)
 		
-		! Prolong up
-		Do i = nLevels, 1, -1
-			call prolong(lhs1D, n1D, i)
-			CALL relaxGS(lhs1D, rhs1D, n1D, i - 1, 5)	
-		END Do		
+		!~ ! Prolong up
+		!~ Do i = nLevels, 1, -1
+			!~ call prolong(lhs1D, n1D, i)
+			!~ CALL relaxGS(lhs1D, rhs1D, n1D, i - 1, nRelax)	
+		!~ END Do		
 		
 		! Copy from 1D array back to 2D array	
 		do i = 1, n
@@ -351,8 +356,8 @@ module moduleMultiGrid
 	
 	subroutine multiGridV(p, rhs)
 			
-		integer,	parameter	:: maxMGIt = 2000
-		integer,	parameter	:: nRelax = 5
+		integer,	parameter	:: maxMGIt = 1
+		integer,	parameter	:: nRelax = 1
 		real(8), 	parameter	:: tol = 1.0e-5
 		real(8),	intent(in)	:: rhs(1 : n, 1 : n)
 		real(8)				:: p(1 : n, 1 : n)
@@ -364,7 +369,7 @@ module moduleMultiGrid
 				nIt = nIt + 1
 				pOld = p
 				!print *, "Center pressure is: ", pOld(n / 2, n / 2)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				call vCycle(p, rhs)
+				call vCycle(p, rhs, nRelax)
 				call normaliseP(p)
 				resid = maxval(abs(pOld - p))
 		end do

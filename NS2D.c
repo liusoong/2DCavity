@@ -114,14 +114,24 @@ void relax_p(double **p,double **f,int nxt,int nyt){
     int i,j,iter;
     double ht,ht2,coef,src;
     ht2 = pow((xright-xleft) / (double) nxt,2);
-    for (iter=1; iter<=p_relax; iter++) {ijloopt {src = f[i][j];
-            if (i==1) {src -= p[2][j]/ht2; coef = -1.0/ht2;}
-            else if (i==nxt) {src -= p[nxt-1][j]/ht2; coef = -1.0/ht2;}
-            else {src -= (p[i+1][j] + p[i-1][j])/ht2; coef = -2.0/ht2;}
-            if (j==1) {src -= p[i][2]/ht2; coef += -1.0/ht2;}
-            else if (j==nyt) {src -= p[i][nyt-1]/ht2; coef += -1.0/ht2;}
-            else {src -= (p[i][j+1] + p[i][j-1])/ht2; coef += -2.0/ht2;}
-            p[i][j] = src / coef;}}
+    for (iter=1; iter<=p_relax; iter++) 
+	{
+		ijloopt 
+		{
+			src = f[i][j];
+			if (i==1) {src -= p[2][j]/ht2; coef = -1.0/ht2;}
+			else if (i==nxt) {src -= p[nxt-1][j]/ht2; coef = -1.0/ht2;}
+			else {src -= (p[i+1][j] + p[i-1][j])/ht2; coef = -2.0/ht2;}
+			if (j==1) {src -= p[i][2]/ht2; coef += -1.0/ht2;}
+			else if (j==nyt) {src -= p[i][nyt-1]/ht2; coef += -1.0/ht2;}
+			else {src -= (p[i][j+1] + p[i][j-1])/ht2; coef += -2.0/ht2;}
+			p[i][j] = src / coef;
+			if (i == j)
+			{
+				printf("%d\t%d\t%f\n", i, j, p[i][j]);
+			}
+		}
+	}
 }
 
 void pressure_update(double **a){
@@ -141,15 +151,15 @@ void vcycle_uv(double **uf,double **ff,int nxf,int nyf,int ilevel){
         uc=dmatrix(1,nxc,1,nyc); fc=dmatrix(1,nxc,1,nyc);
         residual_p(rf,uf,ff,nxf,nyf); restrict(rf,fc,nxc,nyc);
         zero_matrix(uc,1,nxc,1,nyc);
-        vcycle_uv(uc,fc,nxc,nyc,ilevel + 1);
+        //vcycle_uv(uc,fc,nxc,nyc,ilevel + 1);
         prolong(uc,rf,nxc,nyc); mat_add(uf,uf,rf,1,nxf,1,nyf);
-        relax_p(uf,ff,nxf,nyf); free_dmatrix(rf,1,nxf,1,nyf);
+        //relax_p(uf,ff,nxf,nyf); free_dmatrix(rf,1,nxf,1,nyf);
         free_dmatrix(uc,1,nxc,1,nyc); free_dmatrix(fc,1,nxc,1,nyc);}
 }
 
 void MG_Poisson(double **p,double **f)
 {
-	int i,j,max_it = 2000,it_mg = 1;
+	int i,j,max_it = 1, it_mg = 1;
 	double tol = 1.0e-5,resid = 1.0;
 	mat_copy(workv,p,1,nx,1,ny);
 	//printf("CenterPressure is %f \n",p[nx/2][ny/2]);	/////////////////////////////
@@ -168,7 +178,7 @@ void source_uv(double **tu,double **tv,double **divuv,int nxt,int nyt){
     div_uv(tu,tv,divuv,nxt,nyt); 
     ijloopt {
 	    divuv[i][j] /= dt;
-	    printf("%d\t%d\t%f\n", i, j, divuv[i][j]);
+	    //printf("%d\t%d\t%f\n", i, j, divuv[i][j]);
 	    }
 }
 
@@ -244,7 +254,7 @@ int main(){
     int it,max_it,ns,count = 1;
     double **u,**v,**nu,**nv,**p;
     FILE *fu,*fv,*fp;
-    p_relax=5;nx=gnx;ny=gny;n_level=(int)(log(ny)/log(2)-0.9);
+    p_relax=1;nx=gnx;ny=gny;n_level=(int)(log(ny)/log(2)-0.9);
     xleft=0.0;xright=1.0;yleft=0.0;yright=1.0*gny/gnx*xright;
     h = (xright-xleft)/ (double)nx; h2 = pow(h,2);
     max_it=1;ns=(int)(max_it/10+0.001);Re=100.0;dt=0.1*h*h*Re;
