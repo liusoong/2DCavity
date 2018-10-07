@@ -1,5 +1,5 @@
 GFORTRAN module version '10' created from moduleMultiGrid.f95
-MD5:ac919c72f8d44285539dadd1b2550fff -- If you edit this, you'll get what you deserve.
+MD5:ecfac849c6ae34f65de21732b225f52b -- If you edit this, you'll get what you deserve.
 
 (() () () () () () () () () () () () () () () () () () () () () () ()
 () () () ())
@@ -22,8 +22,8 @@ UNKNOWN-PROC UNKNOWN IMPLICIT-SAVE 0 0) (REAL 8 0 0 0 REAL ()) 0 0 () (
 CONSTANT (REAL 8 0 0 0 REAL ()) 0 '0.10000000000000@1') () 0 () () () 0
 0)
 4 'getindex1d' 'modulemultigrid' '' 1 ((PROCEDURE UNKNOWN-INTENT
-MODULE-PROC DECL UNKNOWN 0 0 FUNCTION) (INTEGER 4 0 0 0 INTEGER ()) 5 0
-(6 7 8) () 9 () () () 0 0)
+MODULE-PROC DECL UNKNOWN 0 0 FUNCTION IMPLICIT_PURE) (INTEGER 4 0 0 0
+INTEGER ()) 5 0 (6 7 8) () 9 () () () 0 0)
 10 'getindex1ddown' 'modulemultigrid' '' 1 ((PROCEDURE UNKNOWN-INTENT
 MODULE-PROC DECL UNKNOWN 0 0 FUNCTION) (INTEGER 4 0 0 0 INTEGER ()) 11 0
 (12 13 14) () 15 () () () 0 0)

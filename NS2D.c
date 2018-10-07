@@ -101,13 +101,28 @@ void prolong(double **u_coarse,double **u_fine,int nxt,int nyt){
 }
 
 void restrict(double **u_fine,double **u_coarse,int nxt,int nyt){
-    int i,j;
-    ijloopt {u_coarse[i][j]=0.25*(u_fine[2*i-1][2*j-1]
-    +u_fine[2*i-1][2*j]+u_fine[2*i][2*j-1]+u_fine[2*i][2*j]);} 
+	int i,j;
+	ijloopt 
+	{
+		u_coarse[i][j]=0.25*(u_fine[2*i-1][2*j-1]+u_fine[2*i-1][2*j]+u_fine[2*i][2*j-1]+u_fine[2*i][2*j]);
+		if(i == j)
+			printf("%d\t%d\t%f\n", i, j, u_coarse[i][j]);
+	} 
 }
 
-void residual_p(double **r,double **u,double **f,int nxt,int nyt){
-    laplace_p(u,r,nxt,nyt); mat_sub(r,f,r,1,nxt,1,nyt); 
+void residual_p(double **r,double **u,double **f,int nxt,int nyt)
+{
+	int i,j;
+	laplace_p(u,r,nxt,nyt); 
+	mat_sub(r,f,r,1,nxt,1,nyt); 
+	//~ ijloopt 
+	//~ {
+		//~ if (i == j)
+		//~ {
+			//~ printf("%d\t%d\t%f\t%f\n", i, j, h, r[i][j]);
+		//~ }
+		
+	//~ }
 }
 
 void relax_p(double **p,double **f,int nxt,int nyt){
@@ -126,10 +141,10 @@ void relax_p(double **p,double **f,int nxt,int nyt){
 			else if (j==nyt) {src -= p[i][nyt-1]/ht2; coef += -1.0/ht2;}
 			else {src -= (p[i][j+1] + p[i][j-1])/ht2; coef += -2.0/ht2;}
 			p[i][j] = src / coef;
-			if (i == nxt && j == nyt)
-			{
-				printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\n", i, j, h, src, coef, p[i][j], f[i][j]);
-			}
+			//~ if (i == nxt && j == nyt)
+			//~ {
+				//~ printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\n", i, j, h, src, coef, p[i][j], f[i][j]);
+			//~ }
 		}
 	}
 }

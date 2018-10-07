@@ -14,15 +14,20 @@ module moduleMultiGrid
 	integer function getIndex1D(i, j, level) result (index1D)
 	
 		integer, intent(in)	:: i, j, level
-		integer				:: nTemp, before = 0, thisLevel = 0
+		integer				:: thisLevel, nTemp
+		Integer				:: before
 		
-		Do while(thisLevel < level)
+		before = 0
+		
+		Do thisLevel = 0, level - 1
 			nTemp = n / (2 ** thisLevel)
 			before = before +nTemp ** 2
 		end do
 		
 		thisLevel = level
 		nTemp = n / (2 ** thisLevel)
+		
+		!print *, i, j, level, before,  (i - 1) * nTemp + j + before	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 		
 		index1D = (i - 1) * nTemp + j + before
 	
@@ -140,9 +145,9 @@ module moduleMultiGrid
 					end if
 					! Calculate new (i,j) value
 					lhs1D(index1D) = ((up + down + left + right) - rhs1D(index1D) * h**2) / coef
-					if (i == nTemp .and. j == nTemp) then
-						print *, i, j, index1D, h, lhs1D(index1D), rhs1D(index1D)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					end if
+					!~ if (i == nTemp .and. j == nTemp) then
+						!~ print *, i, j, index1D, h, lhs1D(index1D), rhs1D(index1D)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					!~ end if
 				end do
 			end do		
 		end do
@@ -194,6 +199,9 @@ module moduleMultiGrid
 				end if
 				! Calculate residue
 				res1D(index1D) = rhs1D(index1D) - ((up + down + left + right) - 4 * lhs1D(index1D)) / h**2
+				!~ if (i == j) then
+					!~ print *, i, j, index1D, h, res1D(index1D)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				!~ end if
 			end do
 		end do		
 	
@@ -210,22 +218,42 @@ module moduleMultiGrid
 		integer				:: i, j, index1DCoarse, index1DFine
 
 		nTemp = n / 2 ** (level + 1)
+		Print *, "nTemp = ", nTemp
 		
 		do i = 1 , nTemp
 			Do j = 1 , nTemp
-				index1DCoarse = getIndex1D(i, j, level + 1)
-				! Upper left
-				index1DFine = getIndex1D(2 * i - 1, 2 * j - 1, level)
-				rhs1D(index1DCoarse) = res1D(index1DFine) / 4
-				! Upper right
-				index1DFine = getIndex1D(2 * i - 1, 2 * j, level)
-				rhs1D(index1DCoarse) = rhs1D(index1DCoarse) + res1D(index1DFine) / 4
+				index1DCoarse = getIndex1D(i, j, level + 1)				
+				!~ if (i == j) then
+					!~ Print *, "index1DCoarse = ", index1DCoarse	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				!~ end if
 				! Lower left
-				index1DFine = getIndex1D(2 * i, 2 * j - 1, level)
-				rhs1D(index1DCoarse) = rhs1D(index1DCoarse) + res1D(index1DFine) / 4				
+				index1DFine = getIndex1D(2 * i - 1, 2 * j - 1, level)
+				rhs1D(index1DCoarse) = res1D(index1DFine) / 4						
+				!~ if (i == j) then
+					!~ Print *, "index1DFine = ", index1DFine, "res1D = ", res1D(index1DFine) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				!~ end if
+				! Upper left
+				index1DFine = getIndex1D(2 * i - 1, 2 * j, level)
+				rhs1D(index1DCoarse) = rhs1D(index1DCoarse) + res1D(index1DFine) / 4					
+				!~ if (i == j) then
+					!~ Print *, "index1DFine = ", index1DFine, "res1D = ", res1D(index1DFine) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				!~ end if
 				! Lower right
+				index1DFine = getIndex1D(2 * i, 2 * j - 1, level)
+				rhs1D(index1DCoarse) = rhs1D(index1DCoarse) + res1D(index1DFine) / 4							
+				!~ if (i == j) then
+					!~ Print *, "index1DFine = ", index1DFine, "res1D = ", res1D(index1DFine) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				!~ end if		
+				! Upper right
 				index1DFine = getIndex1D(2 * i, 2 * j, level)
-				rhs1D(index1DCoarse) = rhs1D(index1DCoarse) + res1D(index1DFine) / 4
+				rhs1D(index1DCoarse) = rhs1D(index1DCoarse) + res1D(index1DFine) / 4					
+				!~ if (i == j) then
+					!~ Print *, "index1DFine = ", index1DFine, "res1D = ", res1D(index1DFine) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				!~ end if
+				if (i == j) then
+					print *, i, j, index1DCoarse, rhs1D(index1DCoarse)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+				end if
+
 			end do
 		end do
 
@@ -315,7 +343,7 @@ module moduleMultiGrid
 			i = 0	!!!!!!!!!!!!!!!!!!!!!!!
 			call relaxGS(lhs1D, rhs1D, n1D, i, nRelax)
 			call residue(lhs1D, rhs1d, res1d, n1D, i)
-			!call restrict(res1D, rhs1D, n1D, i)	
+			call restrict(res1D, rhs1D, n1D, i)	
 		!END Do
 		
 		!~ ! Lowest layer
