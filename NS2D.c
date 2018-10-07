@@ -126,9 +126,9 @@ void relax_p(double **p,double **f,int nxt,int nyt){
 			else if (j==nyt) {src -= p[i][nyt-1]/ht2; coef += -1.0/ht2;}
 			else {src -= (p[i][j+1] + p[i][j-1])/ht2; coef += -2.0/ht2;}
 			p[i][j] = src / coef;
-			if (i == j)
+			if (i == nxt && j == nyt)
 			{
-				printf("%d\t%d\t%f\n", i, j, p[i][j]);
+				printf("%d\t%d\t%f\t%f\t%f\t%f\t%f\n", i, j, h, src, coef, p[i][j], f[i][j]);
 			}
 		}
 	}
@@ -254,7 +254,7 @@ int main(){
     int it,max_it,ns,count = 1;
     double **u,**v,**nu,**nv,**p;
     FILE *fu,*fv,*fp;
-    p_relax=1;nx=gnx;ny=gny;n_level=(int)(log(ny)/log(2)-0.9);
+    p_relax=5;nx=gnx;ny=gny;n_level=(int)(log(ny)/log(2)-0.9);
     xleft=0.0;xright=1.0;yleft=0.0;yright=1.0*gny/gnx*xright;
     h = (xright-xleft)/ (double)nx; h2 = pow(h,2);
     max_it=1;ns=(int)(max_it/10+0.001);Re=100.0;dt=0.1*h*h*Re;

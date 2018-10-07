@@ -97,6 +97,8 @@ module moduleMultiGrid
 		integer				:: nTemp
 		integer				:: iIter, i, j, index1D, index1DUp, index1DDown, index1DLeft, index1DRight
 		real(8)				:: up, down, left, right
+		integer				:: coef
+		
 		
 		nTemp = n / (2 ** level)
 		print *, "nTemp = ", nTemp	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -104,6 +106,7 @@ module moduleMultiGrid
 		do iIter = 1 , nIter
 			do i = 1 , nTemp
 				Do j = 1 , nTemp
+					coef = 0
 					! Get 1D array indices
 					index1D = getIndex1D(i, j, level)					
 					index1DUp =getIndex1DUp(i, j, level)					
@@ -112,29 +115,33 @@ module moduleMultiGrid
 					index1DRight =getIndex1DRight(i, j, level)
 					! Get (i-1,j), (i+1,j), (i, j-1) and (i, j+1) values
 					if (index1DUp == 0) then
-						up = lhs1D(index1D)
+						up = 0.
 					else
 						up = lhs1D(index1DUp)
+						coef = coef + 1
 					end if
 					if (index1DDown == 0) then
-						down = lhs1D(index1D)
+						down = 0.
 					else
-						down = lhs1D(index1DDown)
+						down = lhs1D(index1DDown)						
+						coef = coef + 1
 					end if
 					if (index1DLeft == 0) then
-						left = lhs1D(index1D)
+						left = 0.
 					else
 						left = lhs1D(index1DLeft)
+						coef = coef + 1
 					end if
 					if (index1DRight == 0) then
-						right = lhs1D(index1D)
+						right = 0.
 					else
 						right = lhs1D(index1DRight)
+						coef = coef + 1
 					end if
 					! Calculate new (i,j) value
-					lhs1D(index1D) = ((up + down + left + right) - rhs1D(index1D) * h**2) / 4
-					if (i == j) then
-						print *, i, j, index1D, index1DUp, index1DDown, index1DLeft, index1DRight, lhs1D(index1D)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					lhs1D(index1D) = ((up + down + left + right) - rhs1D(index1D) * h**2) / coef
+					if (i == nTemp .and. j == nTemp) then
+						print *, i, j, index1D, h, lhs1D(index1D), rhs1D(index1D)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 					end if
 				end do
 			end do		
@@ -357,7 +364,7 @@ module moduleMultiGrid
 	subroutine multiGridV(p, rhs)
 			
 		integer,	parameter	:: maxMGIt = 1
-		integer,	parameter	:: nRelax = 1
+		integer,	parameter	:: nRelax = 5
 		real(8), 	parameter	:: tol = 1.0e-5
 		real(8),	intent(in)	:: rhs(1 : n, 1 : n)
 		real(8)				:: p(1 : n, 1 : n)
