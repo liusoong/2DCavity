@@ -23,8 +23,14 @@ module moduleFullStep
 						
 		call poisson(h, dt, uTemp, vTemp, p)
 
-		!call correctUV(h, dt, uTemp, vTemp, p, u, v)
+		!~ do i = 1, n
+				!~ print *, i, p(i, i)	!!!!!!!!!!!!!!!!!!!!!!!!!
+		!~ end do
 
+		call correctUV(h, dt, uTemp, vTemp, p, u, v)
+
+		!~ print *, u(n-1, n), v(n, n-1), p(n, n)
+		
 	end subroutine fullStep
 
 	
@@ -161,7 +167,7 @@ module moduleFullStep
 	
 		do i = 1, n
 			do j = 1, n - 1
-				uNew(i, j) = vTemp(i, j) - dt * ((p(i, j + 1) - p(i, j)) / h)
+				vNew(i, j) = vTemp(i, j) - dt * ((p(i, j + 1) - p(i, j)) / h)
 			end do
 		end do
 	

@@ -1,0 +1,1 @@
+gfortran moduleParameters.f95 moduleMultiGrid.f95 moduleFullStep.f95 2DCavity.f95 -o 2DCavity

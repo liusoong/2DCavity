@@ -129,6 +129,7 @@ void relax_p(double **p,double **f,int nxt,int nyt){
     int i,j,iter;
     double ht,ht2,coef,src;
     ht2 = pow((xright-xleft) / (double) nxt,2);
+    //~ printf("n = %d\th = %f\n", nxt, ht2);
     //~ if(nxt ==16)
 	    //~ ijloopt 
 		//~ if(i ==  j)
@@ -145,11 +146,11 @@ void relax_p(double **p,double **f,int nxt,int nyt){
 			else if (j==nyt) {src -= p[i][nyt-1]/ht2; coef += -1.0/ht2;}
 			else {src -= (p[i][j+1] + p[i][j-1])/ht2; coef += -2.0/ht2;}
 			p[i][j] = src / coef;
-			if (i == nxt && j == nyt)
-			{
-				printf("%d\t%d\t%f\t%f\n", i, j, p[i][j], f[i][j]);
+			//~ if (i == nxt && j == nyt)
+			//~ {
+				//~ printf("%d\t%d\t%f\t%f\n", i, j, p[i][j], f[i][j]);
 				//~ printf("%f\t%f\n", p[i-1][j], p[i][j-1]);
-			}
+			//~ }
 		}
 	}
 }
@@ -162,7 +163,7 @@ void pressure_update(double **a){
 }
 
 void vcycle_uv(double **uf,double **ff,int nxf,int nyf,int ilevel){
-	printf("nLevel = %d, iLevel = %d, n = %d\n", n_level, ilevel, nxf);	/////////////////////////////
+	//~ printf("nLevel = %d, iLevel = %d, n = %d\n", n_level, ilevel, nxf);	/////////////////////////////
 	relax_p(uf,ff,nxf,nyf);
 	if (ilevel < n_level) {
         int nxc,nyc;
@@ -172,14 +173,14 @@ void vcycle_uv(double **uf,double **ff,int nxf,int nyf,int ilevel){
         residual_p(rf,uf,ff,nxf,nyf); restrict(rf,fc,nxc,nyc);
         zero_matrix(uc,1,nxc,1,nyc);
         vcycle_uv(uc,fc,nxc,nyc,ilevel + 1);
-        //prolong(uc,rf,nxc,nyc); mat_add(uf,uf,rf,1,nxf,1,nyf);
-        //relax_p(uf,ff,nxf,nyf); free_dmatrix(rf,1,nxf,1,nyf);
+        prolong(uc,rf,nxc,nyc); mat_add(uf,uf,rf,1,nxf,1,nyf);
+        relax_p(uf,ff,nxf,nyf); free_dmatrix(rf,1,nxf,1,nyf);
         free_dmatrix(uc,1,nxc,1,nyc); free_dmatrix(fc,1,nxc,1,nyc);}
 }
 
 void MG_Poisson(double **p,double **f)
 {
-	int i,j,max_it = 1, it_mg = 1;
+	int i,j,max_it = 2000, it_mg = 1;
 	double tol = 1.0e-5,resid = 1.0;
 	mat_copy(workv,p,1,nx,1,ny);
 	//printf("CenterPressure is %f \n",p[nx/2][ny/2]);	/////////////////////////////
@@ -189,6 +190,7 @@ void MG_Poisson(double **p,double **f)
 		vcycle_uv(p,f,nx,ny,1); pressure_update(p);
 		ijloop {sor[i][j] = workv[i][j] - p[i][j];}
 		resid=mat_max(sor,1,nx,1,ny);mat_copy(workv,p,1,nx,1,ny);
+		printf("residual = %16.15f \n",resid);
 	}
 	printf("Mac iteration = %d  residual = %16.15f \n",it_mg,resid);
 }
@@ -250,8 +252,12 @@ void full_step(double **u,double **v,double **nu,double **nv,double **p){
     int i,j;
     advection_uv(u,v,adv_u,adv_v);temp_uv(tu,tv,u,v,adv_u,adv_v);
     Poisson(tu,tv,p); grad_p(p,worku,workv,nx,ny);    
+	
+	//~ for (i=1;i<=nx;i++){printf("i = %f\n", p[i][i]);}
+	
     for (i=1;i<nx;i++){jloop {nu[i][j]=tu[i][j]-dt*worku[i][j];}}
     iloop {for (j=1;j<ny;j++){nv[i][j]=tv[i][j]-dt*workv[i][j];}}
+    //~ printf ("%f\t%f\t%f\n", nu[nx-1][ny], nv[nx][ny-1], p[nx][ny]);
 }
 
 void print_data1(double **u,double **v,double **p){

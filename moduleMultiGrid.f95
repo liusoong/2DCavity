@@ -92,19 +92,20 @@ module moduleMultiGrid
 	end function getIndex1DRight
 	
 	
-	subroutine relaxGS(lhs1D, rhs1D, n1D, level, nIter, hTemp)
+	subroutine relaxGS(lhs1D, rhs1D, n1D, level, nIter, h)
 			
-		integer, intent(in)	:: n1D
+		integer, intent(in)	:: n1D, level, nIter
 		real(8)				:: lhs1D(1 : n1D)
-		real(8),	intent(in)	:: hTemp, rhs1D(1 :  n1D)
-		integer, intent(in)	:: level, nIter
+		real(8),	intent(in)	:: rhs1D(1 :  n1D), h
 		integer				:: nTemp
 		integer				:: iIter, i, j, index1D, index1DUp, index1DDown, index1DLeft, index1DRight
+		real(8)				:: hTemp
 		real(8)				:: up, down, left, right
 		integer				:: coef		
 		
 		nTemp = n / (2 ** level)
-		!~ print *, "nTemp = ", nTemp	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		hTemp = h * (2 ** level)
+		!~ print *, "nTemp = ", nTemp, ",     hTemp = ", hTemp	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		
 		!~ if (nTemp == 16) then
 			!~ do i = 1 , nTemp
@@ -115,7 +116,7 @@ module moduleMultiGrid
 				!~ end if
 				!~ end do
 			!~ end do			
-		!~ end if
+		!~ end if		
 		
 		do iIter = 1 , nIter
 			do i = 1 , nTemp
@@ -154,10 +155,10 @@ module moduleMultiGrid
 					end if
 					! Calculate new (i,j) value
 					lhs1D(index1D) = ((up + down + left + right) - rhs1D(index1D) * hTemp ** 2) / coef
-					if (i == nTemp .and. j == nTemp) then
-						print *, i, j, index1D, lhs1D(index1D), rhs1D(index1D)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-						!~ PRInt *, index1DUp, up, index1DDown, down, index1DLeft, left, index1DRight, right
-					end if
+					!~ if (i == nTemp .and. j == nTemp) then
+						!~ print *, i, j, index1D, lhs1D(index1D), rhs1D(index1D)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+						!!!~ PRInt *, index1DUp, up, index1DDown, down, index1DLeft, left, index1DRight, right
+					!~ end if
 				end do
 			end do		
 		end do
@@ -165,18 +166,19 @@ module moduleMultiGrid
 	end subroutine relaxGS
 	
 	
-	subroutine residue(lhs1D, rhs1d, res1d, n1D, level, hTemp)
+	subroutine residue(lhs1D, rhs1d, res1d, n1D, level, h)
 						
-		integer, intent(in)	:: n1D
-		real(8),	intent(in)	:: hTemp, lhs1D(1 :  n1D), rhs1D(1 :  n1D)
+		integer, intent(in)	:: n1D, level
+		real(8),	intent(in)	:: lhs1D(1 :  n1D), rhs1D(1 :  n1D), h
 		real(8)				:: res1D(1 : n1D)
-		integer, intent(in)	:: level
 		integer				:: nTemp
 		integer				:: i, j, index1D, index1DUp, index1DDown, index1DLeft, index1DRight
+		real(8)				:: hTemp
 		real(8)				:: up, down, left, right
 		
 		nTemp = n / (2 ** level)
-		
+		hTemp = h * (2 ** level)
+				
 		do i = 1 , nTemp
 			Do j = 1 , nTemp
 				! Get 1D array indices
@@ -227,7 +229,7 @@ module moduleMultiGrid
 		integer				:: i, j, index1DCoarse, index1DFine
 
 		nTemp = n / 2 ** (level + 1)
-		Print *, "nTemp = ", nTemp
+		!~ Print *, "nTemp = ", nTemp
 		
 		do i = 1 , nTemp
 			Do j = 1 , nTemp
@@ -314,7 +316,7 @@ module moduleMultiGrid
 		nToReal = n * 1.0
 		nLevels = int(log(nToReal) / log(2.0) + 0.1) - 2		
 		
-		print *, "No. of multi-grid levels: ", nLevels	
+		!~ print *, "No. of multi-grid levels: ", nLevels	
 		
 		n1D = 0
 		
@@ -324,7 +326,7 @@ module moduleMultiGrid
 			nTemp = n / (2 ** i)		
 			n1D = n1D + (nTemp) ** 2	
 			i = i + 1		
-			print "(a10, i8, 10x, a10, i8)",  "nTemp = ", nTemp, "n1D = ", n1D		
+			!~ print "(a10, i8, 10x, a10, i8)",  "nTemp = ", nTemp, "n1D = ", n1D		
 		END Do
 		
 		Allocate(lhs1D(1 : n1D))
@@ -349,27 +351,27 @@ module moduleMultiGrid
 		
 		! Restrict down
 		Do i = 0, nLevels - 1
-			call relaxGS(lhs1D, rhs1D, n1D, i, nRelax, h * 2 ** i)
-			call residue(lhs1D, rhs1d, res1d, n1D, i, h * 2 ** i)
+			call relaxGS(lhs1D, rhs1D, n1D, i, nRelax, h)
+			call residue(lhs1D, rhs1d, res1d, n1D, i, h)
 			call restrict(res1D, rhs1D, n1D, i)	
 		END Do
 		
 		! Lowest layer
-		call relaxGS(lhs1D, rhs1D, n1D, nLevels, nRelax, h * 2 ** nLevels)
+		call relaxGS(lhs1D, rhs1D, n1D, nLevels, nRelax, h)
 		
-		!~ ! Prolong up
-		!~ Do i = nLevels, 1, -1
-			!~ call prolong(lhs1D, n1D, i)
-			!~ CALL relaxGS(lhs1D, rhs1D, n1D, i - 1, nRelax)	
-		!~ END Do		
+		! Prolong up
+		Do i = nLevels, 1, -1
+			call prolong(lhs1D, n1D, i)
+			CALL relaxGS(lhs1D, rhs1D, n1D, i - 1, nRelax, h)	
+		END Do		
 		
 		! Copy from 1D array back to 2D array	
-		!~ do i = 1, n
-			!~ Do j = 1, n
-				!~ thisIndex1D = getIndex1D (i, j, 0)
-				!~ p(i, j) = lhs1D(thisIndex1D)
-			!~ end do
-		!~ end do
+		do i = 1, n
+			Do j = 1, n
+				thisIndex1D = getIndex1D (i, j, 0)
+				p(i, j) = lhs1D(thisIndex1D)
+			end do
+		end do
 
 	end subroutine vCycle
 	
@@ -399,7 +401,7 @@ module moduleMultiGrid
 	
 	subroutine multiGridV(h, p, rhs)
 			
-		integer,	parameter	:: maxMGIt = 1
+		integer,	parameter	:: maxMGIt = 2000
 		integer,	parameter	:: nRelax = 5
 		real(8), 	parameter	:: tol = 1.0e-5
 		real(8), intent(in)	:: h, rhs(1 : n, 1 : n)
@@ -409,12 +411,22 @@ module moduleMultiGrid
 		real(8)				:: pOld(1 : n, 1 : n)
 		
 		do while (nIt <= maxMGIt .and. resid > tol)
-				nIt = nIt + 1
-				pOld = p
-				!print *, "Center pressure is: ", pOld(n / 2, n / 2)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				call vCycle(h, p, rhs, nRelax)
-				call normaliseP(p)
-				resid = maxval(abs(pOld - p))
+			nIt = nIt + 1
+			pOld = p
+			!print *, "Center pressure is: ", pOld(n / 2, n / 2)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			call vCycle(h, p, rhs, nRelax)
+			call normaliseP(p)
+			
+			!~ Do i = 1, n
+				!~ do j = 1, n
+					!~ if (i ==  j) then
+						!~ print *, i, j, p(i, j)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+					!~ end if
+				!~ end do
+			!~ end do
+			
+			resid = maxval(abs(pOld - p))
+			print *, "residue = ", resid	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		end do
 		
 		print "(a17, 1x, i4, 5x, a9, 1x, f16.14)", "No. of iteraiton:", nIt, "Residual:", resid
