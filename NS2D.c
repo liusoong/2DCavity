@@ -190,9 +190,9 @@ void MG_Poisson(double **p,double **f)
 		vcycle_uv(p,f,nx,ny,1); pressure_update(p);
 		ijloop {sor[i][j] = workv[i][j] - p[i][j];}
 		resid=mat_max(sor,1,nx,1,ny);mat_copy(workv,p,1,nx,1,ny);
-		printf("residual = %16.15f \n",resid);
+		//printf("residual = %16.15f \n",resid);
 	}
-	printf("Mac iteration = %d  residual = %16.15f \n",it_mg,resid);
+	//~ printf("Mac iteration = %d  residual = %16.15f \n",it_mg,resid);
 }
 
 void source_uv(double **tu,double **tv,double **divuv,int nxt,int nyt){
@@ -212,7 +212,11 @@ void augmenuv(double **u,double **v,int nx,int ny){
 }
 
 void Poisson(double **tu,double **tv,double **p){
-    source_uv(tu,tv,workp,nx,ny); MG_Poisson(p,workp); 
+	source_uv(tu,tv,workp,nx,ny);
+	int i;
+	//~ iloop {printf("%d\t%f\n", i, workp[i][i]);}	/////////////////////////////////
+	MG_Poisson(p,workp); 
+	//~ iloop {printf("%d\t%f\n", i, p[i][i]);}	/////////////////////////////////
 }
 
 void temp_uv(double **tu,double **tv,double **u,double **v,
@@ -250,14 +254,17 @@ void advection_uv(double **u,double **v,double **adv_u,double **adv_v){
 
 void full_step(double **u,double **v,double **nu,double **nv,double **p){
     int i,j;
-    advection_uv(u,v,adv_u,adv_v);temp_uv(tu,tv,u,v,adv_u,adv_v);
-    Poisson(tu,tv,p); grad_p(p,worku,workv,nx,ny);    
+	advection_uv(u,v,adv_u,adv_v);
+	//~ printf ("%f\t%f\t%f\n", adv_u[nx-1][ny], adv_v[nx][ny-1]);
+	temp_uv(tu,tv,u,v,adv_u,adv_v);
+	//~ printf ("%f\t%f\n", tu[nx-1][ny], tv[nx][ny-1]);
+	Poisson(tu,tv,p); grad_p(p,worku,workv,nx,ny);    
 	
 	//~ for (i=1;i<=nx;i++){printf("i = %f\n", p[i][i]);}
 	
-    for (i=1;i<nx;i++){jloop {nu[i][j]=tu[i][j]-dt*worku[i][j];}}
-    iloop {for (j=1;j<ny;j++){nv[i][j]=tv[i][j]-dt*workv[i][j];}}
-    //~ printf ("%f\t%f\t%f\n", nu[nx-1][ny], nv[nx][ny-1], p[nx][ny]);
+	for (i=1;i<nx;i++){jloop {nu[i][j]=tu[i][j]-dt*worku[i][j];}}
+	iloop {for (j=1;j<ny;j++){nv[i][j]=tv[i][j]-dt*workv[i][j];}}
+	//~ printf ("%f\t%f\t%f\n", nu[nx-1][ny], nv[nx][ny-1], p[nx][ny]);
 }
 
 void print_data1(double **u,double **v,double **p){
@@ -283,7 +290,7 @@ int main(){
     p_relax=5;nx=gnx;ny=gny;n_level=(int)(log(ny)/log(2)-0.9);
     xleft=0.0;xright=1.0;yleft=0.0;yright=1.0*gny/gnx*xright;
     h = (xright-xleft)/ (double)nx; h2 = pow(h,2);
-    max_it=1;ns=(int)(max_it/10+0.001);Re=100.0;dt=0.1*h*h*Re;
+    max_it=1000;ns=(int)(max_it/10+0.001);Re=10.0;dt=0.1*h*h*Re;
     p = dmatrix(1,nx,1,ny); sor = dmatrix(1,nx,1,ny);
     workp=dmatrix(0,nx+1,0,ny+1);worku=dmatrix(0,nx+1,0,ny+1);
     workv=dmatrix(0,nx+1,0,ny+1);u=dmatrix(-1,nx+1,0,ny+1);
@@ -299,14 +306,17 @@ int main(){
     mat_copy(nu,u,0,nx,1,ny); mat_copy(nv,v,1,nx,0,ny);
     for (it=1; it<=max_it; it++) 
     {
-	printf("iteration = %d\n",it);
+	//~ printf("iteration = %d\n",it);
         full_step(u,v,nu,nv,p); mat_copy(u,nu,0,nx,1,ny);
         mat_copy(v,nv,1,nx,0,ny);
-        /*if (it % ns==0) */
+        if (it % 100==0) 
 	{
-		print_data1(nu,nv,p);
+		printf ("%f\t%f\t%f\n", u[nx-1][ny], v[nx][ny-1], p[nx][ny]);
+		//~ print_data1(nu,nv,p);
 		/*printf("print out counts %d \n",count);count++;*/
 	}
     }
+	int i;	///////////////////////////////////
+	//~ for (i=1;i<=nx;i++){printf("%f\n", p[i][i]);}///////////////////////////////////////
     return 0;
 }

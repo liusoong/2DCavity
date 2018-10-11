@@ -21,11 +21,19 @@ program twoDCavity
 	p = 0.0
 		
 	do i = 1, maxIt
-		print *, "Iteration: ", i
-		print *, "----------------------------------------------------" 		
+		!~ print *, "Iteration: ", i
+		!~ print *, "----------------------------------------------------" 		
 		call fullStep(h, dt, drivingV, u, v, p)
+		!~ print *, p(n, n)
 		!printData(u, v, p)
-	enddo
+		if (mod(i, 100) == 0) then
+			print *, u(n-1, n), v(n, n-1), p(n, n)
+		end if
+	end do
+	
+	!~ do i = 1, n
+		!~ print *, i, p(i, i)	!!!!!!!!!!!!!!!!!!!!!!!!!
+	!~ end do
 	
 end program twoDCavity
 

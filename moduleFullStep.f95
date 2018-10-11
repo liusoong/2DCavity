@@ -20,7 +20,9 @@ module moduleFullStep
 		integer 				:: i, j
 		
 		call uvTemp(h, dt, drivingV, u, v, uTemp, vTemp)	
-						
+		
+		!~ print *, uTemp(n-1, n), vTemp(n, n-1)
+
 		call poisson(h, dt, uTemp, vTemp, p)
 
 		!~ do i = 1, n
@@ -119,6 +121,8 @@ module moduleFullStep
 			end do
 		end do
 		
+		!~ print *, advU(n-1, n), advV(n, n-1)
+		
 	end subroutine advectionUV
 	
 	
@@ -141,12 +145,15 @@ module moduleFullStep
 		rhs = rhs / dt
 		
 		!~ Do i = 1, n					!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			!~ do j = 1, n				!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				!~ print *, i, j, rhs(i, j)		!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			!~ end do					!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			!~ print *, i, rhs(i, i)			!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		!~ end do						!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		
 		call multiGridV(h, p, rhs)
+		
+		!~ Do i = 1, n					!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			!~ print *, i, p(i, i)			!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		!~ end do						!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		
 	
 	end subroutine poisson
 	

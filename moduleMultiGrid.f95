@@ -404,32 +404,31 @@ module moduleMultiGrid
 		integer,	parameter	:: maxMGIt = 2000
 		integer,	parameter	:: nRelax = 5
 		real(8), 	parameter	:: tol = 1.0e-5
-		real(8), intent(in)	:: h, rhs(1 : n, 1 : n)
+		real(8), intent(in)		:: h, rhs(1 : n, 1 : n)
 		real(8)				:: p(1 : n, 1 : n)
-		integer				:: i, j, nIt = 1 
+		integer				:: i, j, nIt
 		real(8)				:: resid = 1.0
 		real(8)				:: pOld(1 : n, 1 : n)
+		
+		nIt = 1 
+		resid = 1.0
 		
 		do while (nIt <= maxMGIt .and. resid > tol)
 			nIt = nIt + 1
 			pOld = p
-			!print *, "Center pressure is: ", pOld(n / 2, n / 2)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			!~ print *, "Center pressure is: ", pOld(n / 2, n / 2)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			call vCycle(h, p, rhs, nRelax)
 			call normaliseP(p)
 			
 			!~ Do i = 1, n
-				!~ do j = 1, n
-					!~ if (i ==  j) then
-						!~ print *, i, j, p(i, j)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-					!~ end if
-				!~ end do
+				!~ print *, i,p(i, i)	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			!~ end do
 			
 			resid = maxval(abs(pOld - p))
-			print *, "residue = ", resid	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			!~ print *, "residue = ", resid	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		end do
 		
-		print "(a17, 1x, i4, 5x, a9, 1x, f16.14)", "No. of iteraiton:", nIt, "Residual:", resid
+		!~ print "(a17, 1x, i4, 5x, a9, 1x, f16.14)", "No. of iteraiton:", nIt, "Residual:", resid
 	
 	end subroutine multiGridV
 	
