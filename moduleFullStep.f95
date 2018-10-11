@@ -48,6 +48,8 @@ module moduleFullStep
 		vTemp = 0.0
 		
 		call advectionUV(h, drivingV, u, v, advU, advV)	
+				
+		!~ print *, advU(n-1, n), advV(n, n-1)
 		
 		do i = 1, n - 1
 			do j = 1, n
@@ -81,12 +83,12 @@ module moduleFullStep
 		
 		forall (i = 0 : n) 
 			u(i, 0) = - u(i, 1)
-			u(i, n + 1) = 2.0 * drivingv - u(i, 1)
+			u(i, n + 1) = 2.0 * drivingv - u(i, n)
 		end forall	
 		
 		forall (j = 0 : n)
 			v(0, j) = - v(1, j)
-			v(n + 1, j) = - v(n + 1, j)
+			v(n + 1, j) = - v(n, j)
 		end forall
 		
 		do i = 1, n - 1
@@ -98,9 +100,9 @@ module moduleFullStep
 					advU(i, j) = u(i, j) * ((u(i + 1, j) - u(i, j)) / h)
 				end if
 				if (vatu > 0.0) then
-					advU(i, j) = advu(i, j) + vatu * ((u(i, j) - u(i, j - 1)) / h)
+					advU(i, j) = advU(i, j) + vatu * ((u(i, j) - u(i, j - 1)) / h)
 				else
-					advU(i, j) = advu(i, j) + vatu * ((u(i, j + 1) - u(i, j)) / h)
+					advU(i, j) = advU(i, j) + vatu * ((u(i, j + 1) - u(i, j)) / h)
 				end if
 			end do
 		end do
@@ -114,14 +116,12 @@ module moduleFullStep
 					advV(i, j) = uatv * ((v(i + 1, j) - v(i, j)) / h)
 				end if					
 				if (v(i, j) > 0.0) then
-					advV(i, j) = advv(i, j) + v(i, j) * ((v(i, j) - v(i, j - 1)) / h)
+					advV(i, j) = advV(i, j) + v(i, j) * ((v(i, j) - v(i, j - 1)) / h)
 				else
-					advV(i, j) = advv(i, j) + v(i, j) * ((v(i, j + 1) - v(i, j)) / h)
+					advV(i, j) = advV(i, j) + v(i, j) * ((v(i, j + 1) - v(i, j)) / h)
 				end if
 			end do
 		end do
-		
-		!~ print *, advU(n-1, n), advV(n, n-1)
 		
 	end subroutine advectionUV
 	
