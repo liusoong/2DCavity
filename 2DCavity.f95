@@ -14,7 +14,7 @@ program twoDCavity
 	integer				:: i
 
 	h = 1.0 / n
-	dt = 0.1 * h * h * Re
+	dt = 0.01 * h * h * Re
 	
 	u = 0.0
 	v = 0.0
@@ -27,7 +27,7 @@ program twoDCavity
 		!~ print *, p(n, n)
 		!printData(u, v, p)
 		if (mod(i, 100) == 0) then
-			print *, u(n-1, n), v(n, n-1), p(n, n)
+			print *, u((n-1)/2, n/2), v(n/2, (n-1)/2), p(n/2, n/2)
 		end if
 	end do
 	
