@@ -11,7 +11,7 @@ program twoDCavity
 	real(8) 				:: u(0 : n, 0 : n + 1), v(0 : n + 1, 0 : n)
 	real(8)				:: p(n, n)
 	real(8) 				:: h, dt	
-	integer				:: i, j
+	integer				:: i, j, k
 
 	h = 1.0 / n
 	dt = 0.5 * min(0.25 * h * h * Re, h)
@@ -27,7 +27,21 @@ program twoDCavity
 		!~ print *, p(n, n)
 		!printData(u, v, p)
 		if (mod(i, 100) == 0) then
-			print *, i, u((n-1)/2, n/2), v(n/2, (n-1)/2), p(n/2, n/2)
+			print *, i, i * dt, u((n-1)/2, n/2), v(n/2, (n-1)/2), p(n/2, n/2)	!!!!!!!!!!!!!!!!!
+			! print out result
+			open (unit = 1, file = "u")
+			open (unit = 2, file = "v")	
+			open (unit = 3, file = "p")
+			do j = 1, n
+				write(1, "(f15.8, 5x, f15.8)") (j-0.5) * h, u(n / 2, j)
+				write(2, "(f15.8, 5x, f15.8)") (j-0.5) * h, v(j, n / 2)		
+				do k = 1, n
+					write(3, "(f15.8, 5x, f15.8, 5x, f15.8)") (j-0.5) * h, (k-0.5) * h, p(j, k)		
+				end do
+			end do
+			close(1)
+			close(2)
+			close(3)
 		end if
 	end do
 	
@@ -35,21 +49,7 @@ program twoDCavity
 		!~ print *, i, p(i, i)	!!!!!!!!!!!!!!!!!!!!!!!!!
 	!~ end do
 	
-		
-	! print out result
-	open (unit = 1, file = "u")
-	open (unit = 2, file = "v")	
-	open (unit = 3, file = "p")
-	do i = 1, n
-		write(1, "(f15.8, 5x, f15.8)") (i-0.5) * h, u(n / 2, i)
-		write(2, "(f15.8, 5x, f15.8)") (i-0.5) * h, v(i, n / 2)		
-		do j = 1, n
-			write(3, "(f15.8, 5x, f15.8, 5x, f15.8)") (i-0.5) * h, (j-0.5) * h, p(i, j)		
-		end do
-	end do
-	close(1)
-	close(2)
-	close(3)
+
 	
 end program twoDCavity
 
