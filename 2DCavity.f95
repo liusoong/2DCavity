@@ -14,7 +14,7 @@ program twoDCavity
 	integer				:: i, j, k
 
 	h = 1.0 / n
-	dt = 0.5 * min(0.25 * h * h * Re, h)
+	dt = 0.8 * min(0.25 * h * h * Re, h)
 	
 	u = 0.0
 	v = 0.0
