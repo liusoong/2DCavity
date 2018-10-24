@@ -8,13 +8,14 @@ program twoDCavity
 	implicit none	
 	
 	
+	integer, parameter 	:: maxIt = 100000
 	real(8) 				:: u(0 : n, 0 : n + 1), v(0 : n + 1, 0 : n)
 	real(8)				:: p(n, n)
 	real(8) 				:: h, dt	
 	integer				:: i, j, k
 
 	h = 1.0 / n
-	dt = 0.8 * min(0.25 * h * h * Re, h)
+	dt = 1. * min(0.25 * h * h * Re, h)
 	
 	u = 0.0
 	v = 0.0
