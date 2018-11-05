@@ -8,7 +8,7 @@ program twoDCavity
 	implicit none	
 	
 	
-	integer, parameter 	:: maxIt = 100000
+	integer, parameter 	:: maxIt = 800000
 	real(8) 				:: u(0 : n, 0 : n + 1), v(0 : n + 1, 0 : n)
 	real(8)				:: p(n, n)
 	real(8) 				:: h, dt	
